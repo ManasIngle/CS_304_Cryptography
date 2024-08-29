@@ -1,0 +1,166 @@
+\documentclass[11pt]{article}
+\usepackage[hmargin=1in,vmargin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage[utf8]{inputenc }
+\usepackage{hyphenat}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{algorithmic}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usetikzlibrary{positioning}
+% Define theorem environment
+\newtheorem{theorem}{Theorem}
+\begin{document}
+
+% Adjust formatting here
+\setlength{\parindent}{0pt} % No paragraph indentation
+\setlength{\parskip}{10pt}   % Add space between paragraphs
+\renewcommand{\baselinestretch}{1.2} % Line spacing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent
+\rule{\textwidth}{2pt}
+\begin{center}
+{\bf [CS304] Introduction to Cryptography and Network Security}
+\end{center}
+Course Instructor: Dr. Dibyendu Roy \hfill Winter 2023-2024\\Scribed by: Manas Jitendrakumar Ingle (202151086) \hfill  [Week 11 : Lecture-April 16]
+\rule{\textwidth}{2pt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%write here
+\section{Discrete Logarithm Problem (DLP)}
+The Discrete Logarithm Problem (DLP) is a fundamental problem in the field of cryptography. It plays a crucial role in many cryptographic protocols, including those based on the Diffie-Hellman key exchange and the Digital Signature Algorithm (DSA).
+\\
+
+Let $G$ be a cyclic group of order $q$ with generator $g$. Given an element $h \in G$, the discrete logarithm problem is to find an integer $x$, $0 \leq x < q$, such that $g^x \equiv h \pmod{q}$.
+\\
+
+\textbf{Difficulty}
+
+The security of many cryptographic protocols relies on the assumption that the DLP is computationally difficult to solve. In particular, if an efficient algorithm for solving the DLP were discovered, it would have significant implications for the security of these protocols.
+\\
+
+\textbf{Algorithms}
+
+Several algorithms have been developed for solving the DLP, including:
+
+\begin{itemize}
+    \item \textbf{Brute Force}: Trying all possible values of $x$ until the correct one is found. This approach becomes impractical for large values of $q$.
+    \item \textbf{Baby-step Giant-step}: A classical algorithm that reduces the problem to one of finding a collision in a list of pairs of elements from the group.
+    
+\end{itemize}
+
+The Discrete Logarithm Problem is a fundamental problem in cryptography with important implications for the security of cryptographic protocols. While no polynomial-time algorithm is known for solving the DLP, it remains an active area of research.
+
+\section{Baby-step Giant-step algorithm}
+
+The Baby-step Giant-step algorithm is a method for solving the Discrete Logarithm Problem (DLP) efficiently in cyclic groups. It was first proposed by Daniel Shanks in 1971 and is particularly useful for small to medium-sized groups.
+\\
+
+The Baby-step Giant-step algorithm works by breaking the search space into two smaller sets of elements:
+
+\begin{itemize}
+    \item \textbf{Baby-steps}: A set of small powers of the generator $g$.
+    \item \textbf{Giant-steps}: A set of larger powers of $g$ that are multiples of a pre-chosen integer $m$.
+\end{itemize}
+
+By precomputing and storing these sets, the algorithm can efficiently search for a collision between a baby-step and a giant-step, which yields the solution to the DLP.
+\\
+
+\textbf{Algorithm}
+
+Let $G$ be a cyclic group of order $q$ with generator $g$, and let $h \in G$ be the element for which we want to find the discrete logarithm. The Baby-step Giant-step algorithm proceeds as follows:
+
+\begin{enumerate}
+    \item Choose an integer $m$ such that $m = \lceil \sqrt{q} \rceil$.
+    \item Compute and store the values $g^0, g^1, g^2, ..., g^{m-1}$ (baby-steps).
+    \item Compute the value $g^{-m}$.
+    \item For $j = 0$ to $m-1$, compute $h \cdot (g^{-m})^j$ (giant-steps).
+    \item If a collision is found between a baby-step and a giant-step, i.e., if $h \cdot (g^{-m})^j = g^i$ for some $0 \leq i < m$ and $0 \leq j < m$, then the discrete logarithm $x$ is given by $x = jm + i$.
+\end{enumerate}
+\\
+
+\textbf{Complexity}
+
+The Baby-step Giant-step algorithm has a time complexity of $O(\sqrt{q})$ and requires $O(\sqrt{q})$ storage space, making it particularly efficient for small to medium-sized groups.
+
+\section{Elgamal Encryption}
+ElGamal encryption is a public-key cryptosystem named after its inventor Taher ElGamal. It is based on the Diffie-Hellman key exchange and provides a way to securely exchange messages over an insecure channel without needing to share a secret key beforehand.
+\\
+
+\textbf{Key Generation}
+
+To use ElGamal encryption, each user generates a public-private key pair as follows:
+
+\begin{enumerate}
+    \item Choose a large prime number $p$ and a generator $g$ of the multiplicative group $\mathbb{Z}_p^*$.
+    \item Select a random integer $x$, $1 < x < p-1$, as the private key.
+    \item Compute the public key $y = g^x \mod p$.
+    \item The public key is $(p, g, y)$, and the private key is $x$.
+\end{enumerate}
+\\
+
+\textbf{Encryption}
+
+To encrypt a message using ElGamal encryption, the sender performs the following steps:
+
+\begin{enumerate}
+    \item Choose a random integer $k$, $1 < k < p-1$, as the ephemeral key.
+    \item Compute the shared secret $s = y^k \mod p$.
+    \item Compute the ciphertext pair $(c_1, c_2)$, where $c_1 = g^k \mod p$ and $c_2 = m \cdot s \mod p$, where $m$ is the plaintext message.
+    \item Send $(c_1, c_2)$ as the encrypted message.
+\end{enumerate}
+
+\textbf{Decryption}
+
+To decrypt a ciphertext $(c_1, c_2)$, the receiver uses their private key $x$ as follows:
+
+\begin{enumerate}
+    \item Compute the shared secret $s = c_1^x \mod p$.
+    \item Compute the plaintext message $m = c_2 \cdot s^{-1} \mod p$.
+\end{enumerate}
+
+\textbf{Security}
+
+ElGamal encryption is semantically secure under the decisional Diffie-Hellman assumption. However, it is vulnerable to chosen ciphertext attacks if care is not taken during implementation.
+
+\section{Kerberos Version - 4 Message Exchange}
+Kerberos is a network authentication protocol designed to provide strong authentication for client-server applications. Kerberos Version 4 (Kerberos V4) is an early version of the protocol that operates based on a symmetric key system and uses a trusted third party, known as the Key Distribution Center (KDC), to authenticate users and servers.
+
+\subsection{Message Exchange}
+
+The Kerberos V4 message exchange involves the following steps:
+
+\subsection{Authentication}
+
+\begin{enumerate}
+    \item \textbf{Authentication Request}: The client sends an authentication request to the KDC, requesting a ticket-granting ticket (TGT) to access a specific service.
+    \item \textbf{TGT Issuance}: The KDC verifies the client's identity and issues a TGT encrypted with the client's secret key ($K_c$). The TGT contains a session key ($K_{c,s}$) for the client to use with the Ticket-Granting Server (TGS) and a timestamp.
+    \item \textbf{TGT Transmission}: The KDC sends the TGT back to the client.
+\end{enumerate}
+
+\subsection{Service Request}
+
+\begin{enumerate}
+    \item \textbf{Service Request}: The client sends a service request to the TGS, along with the TGT obtained in the previous step.
+    \item \textbf{Service Ticket Issuance}: The TGS verifies the TGT and issues a service ticket for the requested service, encrypted with the service's secret key ($K_s$). The service ticket contains a session key ($K_{c,s}$) for secure communication with the service and a timestamp.
+    \item \textbf{Service Ticket Transmission}: The TGS sends the service ticket back to the client.
+\end{enumerate}
+
+\subsection{Service Access}
+
+\begin{enumerate}
+    \item \textbf{Service Access}: The client sends the service ticket to the requested service, along with a timestamp encrypted with the session key ($K_{c,s}$).
+    \item \textbf{Service Verification}: The service verifies the authenticity of the service ticket and the timestamp. If valid, the service grants access to the client.
+\end{enumerate}
+
+\subsection{Security Considerations}
+
+The Kerberos V4 protocol relies on symmetric cryptography and assumes a trusted KDC. However, it is vulnerable to certain attacks, such as replay attacks and man-in-the-middle attacks. These vulnerabilities were addressed in later versions of the Kerberos protocol.
+
+\end{document}
+
+

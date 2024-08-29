@@ -1,0 +1,195 @@
+\documentclass[11pt]{article}
+\usepackage[hmargin=1in,vmargin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb,amsfonts,url,sectsty,framed,tcolorbox,framed}
+\documentclass{article}
+\usepackage{amsmath}
+\newcommand{\pf}{{\bf Proof: }}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newcommand{\qed}{\hfill \rule{2mm}{2mm}}
+
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent
+\rule{\textwidth}{1pt}
+\begin{center}
+{\bf [CS304] Introduction to Cryptography and Network Security}
+\end{center}
+Course Instructor: Dr. Dibyendu Roy \hfill Winter 2023-2024\\
+Scribed by: Manas Jitendrakumar Ingle (202151086) \hfill Lecture (Week 12)
+\\
+\rule{\textwidth}{1pt}
+
+\section{Secured Sockets Layer Protocol}
+
+The Secure Socket Layer (SSL) is a cryptographic protocol designed to provide secure communication over a computer network. It ensures privacy, integrity, and authentication of data transmitted between a client and a server. SSL uses cryptographic algorithms to encrypt data, preventing unauthorized access and tampering. It’s commonly used in web browsers for secure online transactions, such as online banking or shopping.
+
+\subsection{Symmetric Key Encryption Algorithms}
+
+Preferred for their computational efficiency compared to Public Key Cryptography.
+
+\subsection{Key Exchange Protocol, Signature Mechanism, and Message Authentication Code}
+
+Ensure secure communication, authentication, and integrity of transmitted data.
+
+SSL, implemented in HTTPS, enables secure communication by facilitating key exchange, symmetric key encryption, public key authentication, and message authentication code verification between two parties.
+
+\subsubsection{Session}
+
+An SSL session represents a connection between a client and server, established through the Handshake protocol. It defines a collection of cryptographic security settings that can be utilized across various connections. A session state is defined by the following parameters:
+
+\begin{enumerate}
+    \item Session identifier: An arbitrary byte sequence chosen by the server to identify an active or resumable session state.
+    \item Peer certificate: An x509.v3 certificate from the peer, which may sometimes be absent. Typically, this certificate is signed by a certified authority to validate the correctness of the public key.
+    \item Compression method: The algorithm used to compress data prior to encryption.
+    \item Cipher Spec (Specification short form): It specifies the bulk data encryption algorithm (such as null, AES, etc.), a hash algorithm (such as MD5 or SHA-1) used for MAC calculation, a mechanism for key exchange (Diffie-Hellman, ECDH). It also defines cryptographic attributes such as the hash size.
+    \item Master secret key: 48-byte secret shared between the client and server used to generate certain keys such as key for encrypting the data and a key for generating MAC.
+    \item Is resumable: A flag indicating whether the session can be used to initiate new connections.
+\end{enumerate}
+
+\subsubsection{Connection}
+
+Parameters for connection state:
+
+\begin{enumerate}
+    \item Server and client random: Byte sequences that are chosen by the server and client for each connection. These are generated individually at the client and the server side.
+    \item Server write MAC secret: The secret key used in MAC operations on data sent by the server.
+    \item Client write MAC secret: The symmetric key used in MAC operations on data sent by the client.
+    \item Server write key: The symmetric encryption key for data encrypted by the server and decrypted by the client.
+    \item Client write key: The secret encryption key for data encrypted by client and decrypted by server.
+    \item Initialization vectors: In CBC mode with a block cipher, each key is associated with an initialization vector (IV). This IV is initially set during the Handshake Protocol. Subsequently, the last ciphertext block from each record serves as the IV for the next record.
+    \item Sequence numbers: For each connection, both parties keep track of separate sequence numbers for messages sent and received. When a party sends or receives a "change cipher spec message," the relevant sequence number is reset to zero. Sequence numbers are limited to a maximum value of $2^{64} - 1$.
+\end{enumerate}
+
+\subsection{SSL Record Protocol}
+
+The SSL (Secure Sockets Layer) record protocol is responsible for fragmenting and encapsulating higher-level protocol data into manageable chunks called records for secure transmission over a network. It also handles encryption, authentication, and integrity checks of these records to ensure secure communication between the client and server. This protocol provides services for connection:
+
+\begin{enumerate}
+    \item Confidentiality: The Handshake Protocol defines a shared secret key that is used for conventional encryption of SSL payloads.
+    \item Message Integrity: The Handshake Protocol also defines a shared secret key that is used to form a message authentication code (MAC).
+\end{enumerate}
+
+The list of encryption algorithms supported by SSL is given below:
+
+\begin{itemize}
+    \item AES
+    \item IDEA
+    \item RC2-40
+    \item DES-40
+    \item DES
+    \item 3DES
+    \item Fortezza
+    \item RC4-40
+    \item RC4-128
+\end{itemize}
+
+The header contains the following information:
+
+\begin{itemize}
+    \item Content Type (8 bits): The type of data
+    \item Major Version (8 bits)
+    \item Minor Version (8 bits)
+    \item Compressed Length (16 bits): length of the compressed data
+\end{itemize}
+
+\subsubsection{Change Cipher Spec Protocol}
+
+Another protocol within SSL is the Change Cipher Spec Protocol, which facilitates updating the encryption method used in a connection.
+
+\subsubsection{Alert Protocol}
+
+The Alert Protocol handles various alerts such as:
+
+\begin{itemize}
+    \item unexpected message
+    \item bad record mac
+    \item decompression failure
+    \item handshake failure
+    \item illegal parameter
+    \item close notify
+    \item bad certificate
+    \item unsupported certificate
+    \item certificate revoked
+    \item certificate expired
+    \item certificate unknown
+\end{itemize}
+
+\subsubsection{Handshake Protocol}
+
+The Handshake Protocol performs the handshaking between the two parties and generates a common secret key.
+\\
+\subsection{An Overview on Signal Protocol}
+
+In messaging applications, ensuring that messages are only readable by the intended recipient over a public channel requires End-to-End Encryption. In this setup, a server facilitates message transmission but remains unaware of the message content, as it lacks the ability to decrypt the messages. The encryption relies on a shared key exclusively known to the communicating parties.
+
+\subsubsection{Authenticated Encryption with Associated Data (AD)}
+
+\begin{itemize}
+    \item Associated Data (AD) is authenticated but not encrypted.
+    \item Schemes are nonce-based (and deterministic).
+\end{itemize}
+
+Sender: 
+\[ C = \text{Enc}(K, N, \text{AD}, M) \]
+\begin{itemize}
+    \item $K$: key
+    \item $N$: Nonce (random number to be only used once)
+    \item $\text{AD}$: Associated Data
+    \item $M$: Message
+\end{itemize}
+
+Receiver: 
+\[ M = \text{Dec}(K, N, \text{AD}, C) \]
+
+When sending a message along with an Additional Data (AD) over the server, the AD is transmitted without encryption. The receiver validates the received AD to ensure the integrity of the message. Thus, the AD serves to authenticate the source of the message.
+
+\subsubsection{Main Cryptographic modules of Signal Protocol}
+
+\begin{itemize}
+    \item X3DH (Extended Triple Diffie-Hellman)
+    \item ECDSA
+    \item Double Ratchet
+\end{itemize}
+
+X3DH facilitates shared key generation, while ECDSA signs public keys to prevent unauthorized production of valid keys on behalf of a user. The Double Ratchet algorithm is employed for encryption, generating unique keys for each message exchanged.
+
+\subsubsection{Registration}
+
+Alice registers himself to the Server. He has to provide the id to register.
+
+\textbf{Alice}
+\begin{itemize}
+    \item Identity key (IKA)
+    \item Signed prekey (SPKA)
+    \item Optionally, a set of one-time prekeys (OPK1A, OPK2A, OPK3A)
+\end{itemize}
+
+\textbf{Bob}
+\begin{itemize}
+    \item Identity key (IKB)
+\end{itemize}
+
+\subsubsection{Registration (Continued)}
+
+\textbf{Server} stores both the packets.
+
+\subsubsection{Key Exchange}
+
+Alice generates an ephemeral key (EKA) and performs Diffie-Hellman (DH) key exchange. Then, using the shared secret key (SKA), Alice encrypts the initial message, resulting in the generation of the corresponding initial ciphertext.
+
+\textbf{Bob}
+\begin{itemize}
+    \item Retrieves Alice’s Identity Key (IKA) and her Encrypted Key (EKA)
+    \item Engages in Diffie-Hellman (DH) key exchange
+    \item Utilizes Key Derivation Function (KDF) with his secret keys, resulting in the generation of his shared secret key (SKB)
+    \item Constructs the associated data (AD) and decrypts the initial ciphertext using SKB, along with AD, successfully recovering the original message
+\end{itemize}
+
+
+\end{document}
